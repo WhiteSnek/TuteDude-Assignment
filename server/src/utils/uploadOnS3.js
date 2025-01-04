@@ -18,7 +18,6 @@ const uploadToS3 = async (fileContent, key) => {
     Bucket: process.env.AWS_BUCKET_NAME,
     Key: key,
     Body: fileContent,
-    ContentType: 'image/png', 
   };
 
   try {
