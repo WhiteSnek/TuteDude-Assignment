@@ -4,6 +4,7 @@ import { createBrowserRouter, createRoutesFromElements, Route, RouterProvider } 
 import App from "./App.tsx";
 import { LandingPage } from "./pages";
 import "./index.css";
+import ExplorePage from "./pages/ExplorePage.tsx";
 
 const Layout: React.FC = () => {
   const router = createBrowserRouter(
@@ -12,6 +13,10 @@ const Layout: React.FC = () => {
         <Route
           path=""
           element={<LandingPage />}
+        />
+        <Route
+          path="/explore"
+          element={<ExplorePage />}
         />
       </Route>
     )
