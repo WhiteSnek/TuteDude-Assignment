@@ -5,12 +5,18 @@ import Search from "./Search";
 import Profile from "./Profile";
 
 import Login from "./Login";
+import Register from "./Register";
 import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
 
 const Navbar: React.FC = () => {
   const [isLoginOpen, setIsLoginOpen] = useState(false);
+  const [isRegisterOpen, setIsRegisterOpen] = useState(false);
 
   const user = null;
+
+  const closeLoginDialog = () => setIsLoginOpen(false);
+  const openRegisterDialog = () => setIsRegisterOpen(true);
+  const closeRegisterDialog = () => setIsRegisterOpen(false);
 
   return (
     <>
@@ -34,6 +40,7 @@ const Navbar: React.FC = () => {
         </div>
       </nav>
 
+      {/* Dialog for Login */}
       <Dialog open={isLoginOpen} onOpenChange={setIsLoginOpen}>
         <DialogTrigger asChild>
           <Button onClick={() => setIsLoginOpen(true)} className="hidden">
@@ -41,7 +48,19 @@ const Navbar: React.FC = () => {
           </Button>
         </DialogTrigger>
         <DialogContent>
-          <Login />
+          <Login closeDialog={closeLoginDialog} openRegisterDialog={openRegisterDialog} />
+        </DialogContent>
+      </Dialog>
+
+      {/* Dialog for Register */}
+      <Dialog open={isRegisterOpen} onOpenChange={setIsRegisterOpen}>
+        <DialogTrigger asChild>
+          <Button onClick={() => setIsRegisterOpen(true)} className="hidden">
+            Open Register Dialog
+          </Button>
+        </DialogTrigger>
+        <DialogContent>
+          <Register closeDialog={closeRegisterDialog} />
         </DialogContent>
       </Dialog>
     </>
