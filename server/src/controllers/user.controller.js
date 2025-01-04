@@ -444,7 +444,39 @@ const getRecommendedPeople = asyncHandler(async (req, res) => {
 });
 
 
+const addInterests = asyncHandler(async (req, res) => {
+  const { interests } = req.body;
 
+  if (!Array.isArray(interests)) {
+    return res
+      .status(400)
+      .json(new ApiResponse(400, {}, "Interests must be an array"));
+  }
+
+  if (interests.length === 0) {
+    return res
+      .status(400)
+      .json(new ApiResponse(400, {}, "Interests cannot be an empty array"));
+  }
+
+  const user = await User.findByIdAndUpdate(
+    req.user._id, 
+    {
+      $addToSet: { interests: { $each: interests } }, 
+    },
+    { new: true } 
+  );
+
+  if (!user) {
+    return res
+      .status(404)
+      .json(new ApiResponse(404, {}, "User not found"));
+  }
+
+  return res
+    .status(200)
+    .json(new ApiResponse(200, { interests: user.interests }, "Interests added successfully"));
+});
 
 
 
@@ -457,4 +489,5 @@ export {
     sendFriendRequest,
     getFriends,
     getRecommendedPeople,
+    addInterests
 }
