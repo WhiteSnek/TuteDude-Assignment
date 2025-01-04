@@ -24,12 +24,10 @@ const FeaturesSection: React.FC = () => {
   return (
     <section className="py-16 px-8 bg-gray-50">
       <div className="max-w-6xl mx-auto text-center">
-        {/* Section Title */}
         <h2 className="text-4xl font-extrabold text-gray-800 mb-12">
           Features Designed for You
         </h2>
 
-        {/* Features Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-10">
           {features.map((feature, index) => (
             <Card

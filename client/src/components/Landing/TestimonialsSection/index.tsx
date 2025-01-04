@@ -16,19 +16,37 @@ const testimonials = [
 
 const TestimonialsSection: React.FC = () => {
   return (
-    <section className="py-16 px-8 bg-white">
-      <div className="max-w-4xl mx-auto text-center">
-        <h2 className="text-3xl font-bold mb-8">What Our Users Say</h2>
-        <div className="space-y-8">
+    <section className="py-16 px-8 bg-gray-50">
+      <div className="max-w-6xl mx-auto text-center">
+
+        <h2 className="text-4xl font-extrabold text-gray-800 mb-12">
+          What Our Users Say
+        </h2>
+
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-8">
           {testimonials.map((testimonial, index) => (
-            <div key={index} className="flex items-center space-x-4">
-              <Avatar>
-                <AvatarImage src={testimonial.avatar} />
-                <AvatarFallback>{testimonial.name[0]}</AvatarFallback>
-              </Avatar>
-              <div>
-                <p className="font-semibold">{testimonial.name}</p>
-                <p className="text-gray-600">{testimonial.feedback}</p>
+            <div
+              key={index}
+              className="bg-white shadow-lg rounded-lg p-6 text-left border border-gray-200 hover:shadow-2xl transition-shadow duration-300"
+            >
+              <div className="flex items-center space-x-4 mb-4">
+
+                <Avatar className="w-14 h-14">
+                  <AvatarImage src={testimonial.avatar} />
+                  <AvatarFallback>{testimonial.name[0]}</AvatarFallback>
+                </Avatar>
+
+                <p className="font-bold text-lg text-gray-800">
+                  {testimonial.name}
+                </p>
+              </div>
+
+              <div className="relative px-10">
+                <span className="absolute ml-16 -left-6 -top-4 text-indigo-500 text-6xl font-serif leading-none">
+                  “
+                </span>
+                <p className="text-gray-800 font-light text-lg pl-6">{testimonial.feedback}</p>
               </div>
             </div>
           ))}
