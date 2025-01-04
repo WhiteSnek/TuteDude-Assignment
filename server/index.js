@@ -4,7 +4,7 @@ import express from "express";
 import cors from "cors";
 import bodyParser from "body-parser";
 import cookieParser from "cookie-parser";
-import routes from "./src/routes/index.js";
+// import routes from "./src/routes/index.js";
 
 const app = express();
 
@@ -26,7 +26,7 @@ app.use(bodyParser.raw({ limit: "10mb", type: "image/*" }));
 
 const PORT = process.env.PORT || 5000;
 connect();
-routes(app);
+// routes(app);
 app.get("/", (req, res) => {
   res.status(200).json({ msg: "Everything fine!" });
 });
