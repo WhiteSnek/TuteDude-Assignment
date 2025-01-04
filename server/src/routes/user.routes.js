@@ -8,7 +8,8 @@ import {
     sendFriendRequest,
     getFriends,
     getRecommendedPeople,
-    addInterests
+    addInterests,
+    getUserProfile
 } from "../controllers/user.controller.js";
 import { upload } from "../middlewares/multer.middleware.js";
 import { verifyJWT } from "../middlewares/auth.middleware.js";
@@ -23,4 +24,5 @@ router.route("/request").get(verifyJWT, getAllRequests).post(verifyJWT, sendFrie
 router.route("/friends").get(verifyJWT, getFriends);
 router.route("/recommended").get(verifyJWT, getRecommendedPeople)
 router.route("/interests").post(verifyJWT, addInterests)
+router.route("/profile/:userId").get(getUserProfile);
 export default router;

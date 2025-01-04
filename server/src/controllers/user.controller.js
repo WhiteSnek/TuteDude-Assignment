@@ -478,7 +478,29 @@ const addInterests = asyncHandler(async (req, res) => {
     .json(new ApiResponse(200, { interests: user.interests }, "Interests added successfully"));
 });
 
+const getUserProfile = asyncHandler(async (req, res) => {
+  const { userId } = req.params; 
 
+  if (!userId) {
+    return res
+      .status(400)
+      .json(new ApiResponse(400, {}, "User ID is required"));
+  }
+
+  const user = await User.findById(userId)
+    .select("fullname username avatar interests friends")
+    .populate("friends", "fullname username avatar"); 
+
+  if (!user) {
+    return res
+      .status(404)
+      .json(new ApiResponse(404, {}, "User not found"));
+  }
+
+  return res
+    .status(200)
+    .json(new ApiResponse(200, { user }, "User profile retrieved successfully"));
+});
 
 export {
     registerUser,
@@ -489,5 +511,6 @@ export {
     sendFriendRequest,
     getFriends,
     getRecommendedPeople,
-    addInterests
+    addInterests,
+    getUserProfile
 }
