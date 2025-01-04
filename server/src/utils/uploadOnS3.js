@@ -9,7 +9,6 @@ const s3Client = new S3Client({
     secretAccessKey: process.env.AWS_SECRET_KEY,
   },
 });
-
 if (!process.env.AWS_ACCESS_KEY || !process.env.AWS_SECRET_KEY || !process.env.AWS_BUCKET_NAME) {
   throw new Error("Missing required AWS environment variables");
 }
