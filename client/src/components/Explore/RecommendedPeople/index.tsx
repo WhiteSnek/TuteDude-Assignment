@@ -45,14 +45,14 @@ const RecommendedPeople: React.FC<RecommendedPeopleProps> = ({
         {recommendedPeople.map((user) => (
           <div
             key={user.id}
-            className="relative flex items-center gap-4 p-5 border border-gray-200 rounded-lg bg-white shadow-sm hover:shadow-lg transition-all duration-300 hover:border-indigo-500"
+            className="relative flex flex-col sm:flex-row items-center gap-4 p-5 border border-gray-200 rounded-lg bg-white shadow-sm hover:shadow-lg transition-all duration-300 hover:border-indigo-500"
           >
             <X
               className="absolute top-2 right-2 cursor-pointer text-gray-500 hover:text-gray-700"
               onClick={() => handleDeleteRecommendation(user.id)}
             />
             <img src={user.avatar} alt={user.name} className="w-16 h-16 rounded-full object-cover" />
-            <div className="flex flex-col">
+            <div className="flex flex-col sm:flex-1">
               <span className="font-semibold text-gray-700">{user.name}</span>
               <span className="text-sm text-gray-500 mt-1">Mutual Friends: {user.mutualFriends.length}</span>
               <Button
@@ -64,7 +64,7 @@ const RecommendedPeople: React.FC<RecommendedPeopleProps> = ({
                 Why Recommended
               </Button>
             </div>
-            <div className="ml-auto">
+            <div className="mt-4 sm:mt-0 sm:ml-auto">
               {friendRequestSent === user.id ? (
                 <Button className="mt-2 bg-gray-400 text-white px-4 py-2 rounded-full" disabled>
                   Friend Request Sent
