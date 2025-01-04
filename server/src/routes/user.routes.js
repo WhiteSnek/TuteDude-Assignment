@@ -3,9 +3,9 @@ import {
     registerUser,
     loginUser,
     logoutUser,
-    addFriend,
+    handleFriendRequest,
     getAllRequests,
-    rejectFriendRequest
+    sendFriendRequest
 } from "../controllers/user.controller.js";
 import { upload } from "../middlewares/multer.middleware.js";
 import { verifyJWT } from "../middlewares/auth.middleware.js";
@@ -15,8 +15,7 @@ const router = Router();
 router.route("/register").post(upload.single("avatar"), registerUser);
 router.route("/login").post(loginUser);
 router.route("/logout").post(verifyJWT, logoutUser);
-router.route("/add-friend").post(verifyJWT, addFriend);
-router.route("/requests").get(verifyJWT, getAllRequests);
-router.route("/reject").patch(verifyJWT, rejectFriendRequest);
+router.route("/friend-request").post(verifyJWT, handleFriendRequest);
+router.route("/request").get(verifyJWT, getAllRequests).post(verifyJWT, sendFriendRequest);
 
 export default router;

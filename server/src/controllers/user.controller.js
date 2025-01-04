@@ -1,8 +1,10 @@
 import { asyncHandler } from "../utils/asyncHandler.js";
 import { User } from "../models/user.model.js";
+import { Request } from '../models/request.model.js'
 import { ApiResponse } from "../utils/ApiResponse.js";
 import { uploadToS3 } from "../utils/uploadOnS3.js";
 import { generateTokens } from "../utils/GenerateToken.js";
+import { uploadOnCloudinary } from "../utils/cloudinary.js";
 
 const registerUser = asyncHandler(async (req, res) => {
   const { fullname, username, password } = req.body;
@@ -12,7 +14,7 @@ const registerUser = asyncHandler(async (req, res) => {
       .json(new ApiResponse(400, {}, "All fields are required"));
   }
   const existedUser = await User.findOne({
-    $or: [{ username }, { email }],
+    username
   });
   if (existedUser)
     return res
@@ -23,9 +25,10 @@ const registerUser = asyncHandler(async (req, res) => {
   if (!avatarLocalPath)
     return res
       .status(400)
-      .json(new ApiResponse(400, {}, "Avatar are required"));
+      .json(new ApiResponse(400, {}, "Avatar is required"));
   const key = `profile/${username}`;
-  const avatar = await uploadToS3(avatarLocalPath, key);
+  // const avatar = await uploadToS3(avatarLocalPath, key);
+  const avatar = await uploadOnCloudinary(avatarLocalPath)
   if (!avatar)
     return res
       .status(500)
@@ -134,41 +137,57 @@ const logoutUser = asyncHandler(async (req, res) => {
     .json(new ApiResponse(200, {}, "User logged out"));
 });
 
-const addFriend = asyncHandler(async (req, res) => {
-  const { friendId } = req.body;
+const handleFriendRequest = asyncHandler(async (req, res) => {
+  const { requestId, status } = req.body;
 
-  if (!friendId) {
+  if (!requestId || !status) {
     return res
       .status(400)
-      .json(new ApiResponse(400, {}, "Friend ID is required"));
+      .json(new ApiResponse(400, {}, "Request ID and status are required"));
   }
 
-  const friendRequest = await Request.findOne({
-    fromUserId: friendId,
-    toUserId: req.user._id,
-    status: "pending",
-  });
+  if (!["accepted", "rejected"].includes(status)) {
+    return res
+      .status(400)
+      .json(new ApiResponse(400, {}, "Invalid status value"));
+  }
+
+  const friendRequest = await Request.findById(requestId);
 
   if (!friendRequest) {
     return res
       .status(404)
-      .json(new ApiResponse(404, {}, "Friend request not found or already handled"));
+      .json(new ApiResponse(404, {}, "Friend request not found"));
   }
 
-  friendRequest.status = "accepted";
+  if (friendRequest.toUserId.toString() !== req.user._id.toString()) {
+    return res
+      .status(403)
+      .json(new ApiResponse(403, {}, "You are not authorized to handle this request"));
+  }
+
+  // Update the request status
+  friendRequest.status = status;
   await friendRequest.save();
 
-  await User.findByIdAndUpdate(req.user._id, {
-    $addToSet: { friends: friendId },
-  });
+  if (status === "accepted") {
+    // Add both users as friends
+    await User.findByIdAndUpdate(req.user._id, {
+      $addToSet: { friends: friendRequest.fromUserId },
+    });
 
-  await User.findByIdAndUpdate(friendId, {
-    $addToSet: { friends: req.user._id },
-  });
+    await User.findByIdAndUpdate(friendRequest.fromUserId, {
+      $addToSet: { friends: req.user._id },
+    });
+
+    return res
+      .status(200)
+      .json(new ApiResponse(200, {}, "Friend request accepted and friend added"));
+  }
 
   return res
     .status(200)
-    .json(new ApiResponse(200, {}, "Friend added successfully"));
+    .json(new ApiResponse(200, {}, "Friend request rejected"));
 });
 
 const getAllRequests = asyncHandler(async (req, res) => {
@@ -207,41 +226,62 @@ const getAllRequests = asyncHandler(async (req, res) => {
     .json(new ApiResponse(200, { requests }, "Friend requests fetched successfully"));
 });
 
-const rejectFriendRequest = asyncHandler(async (req, res) => {
-  const userId = req.user._id;
-  const { fromUserId } = req.body;
+const sendFriendRequest = asyncHandler(async (req, res) => {
+  const { toUserId } = req.body;
 
-  if (!fromUserId) {
+  if (!toUserId) {
     return res
       .status(400)
-      .json(new ApiResponse(400, {}, "User ID is required"));
+      .json(new ApiResponse(400, {}, "Recipient user ID is required"));
   }
 
-  // Find the request and ensure the logged-in user is the recipient
-  const friendRequest = await Request.findOne({
-    fromUserId,
-    toUserId: userId,
-  });
+  if (toUserId === req.user._id.toString()) {
+    return res
+      .status(400)
+      .json(new ApiResponse(400, {}, "You cannot send a friend request to yourself"));
+  }
 
-  if (!friendRequest) {
+  // Check if the recipient user exists
+  const recipientUser = await User.findById(toUserId);
+  if (!recipientUser) {
     return res
       .status(404)
-      .json(new ApiResponse(404, {}, "Friend request not found or unauthorized"));
+      .json(new ApiResponse(404, {}, "Recipient user not found"));
   }
 
-  friendRequest.status = "rejected";
-  await friendRequest.save();
+  // Check if a friend request already exists
+  const existingRequest = await Request.findOne({
+    fromUserId: req.user._id,
+    toUserId,
+    status: "pending",
+  });
+
+  if (existingRequest) {
+    return res
+      .status(400)
+      .json(new ApiResponse(400, {}, "Friend request already sent"));
+  }
+
+  // Create a new friend request
+  const newRequest = new Request({
+    fromUserId: req.user._id,
+    toUserId,
+    status: "pending",
+  });
+
+  await newRequest.save();
 
   return res
-    .status(200)
-    .json(new ApiResponse(200, {}, "Friend request rejected successfully"));
+    .status(201)
+    .json(new ApiResponse(201, {}, "Friend request sent successfully"));
 });
+
 
 export {
     registerUser,
     loginUser,
     logoutUser,
-    addFriend,
+    handleFriendRequest,
     getAllRequests,
-    rejectFriendRequest
+    sendFriendRequest
 }
