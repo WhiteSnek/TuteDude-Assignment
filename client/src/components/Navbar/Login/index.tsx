@@ -20,7 +20,7 @@ const Login: React.FC<LoginProps> = ({ closeDialog, openRegisterDialog }) => {
   return (
     <div className="p-6 flex justify-center items-center">
       <div>
-        <DialogTitle className="text-2xl font-bold text-indigo-800">Login</DialogTitle>
+        <DialogTitle className="text-2xl font-bold text-indigo-800 text-center">Login</DialogTitle>
         <DialogDescription className="text-gray-700 mb-4">
           Please enter your username and password to log in.
         </DialogDescription>
@@ -80,7 +80,7 @@ const Login: React.FC<LoginProps> = ({ closeDialog, openRegisterDialog }) => {
         <div className="mt-4 text-center">
           <Button
             type="button"
-            className="text-indigo-800 hover:text-indigo-600"
+            className="text-indigo-800 hover:text-indigo-600 bg-transparent hover:bg-transparent shadow-none"
             onClick={() => {
               closeDialog(); // Close the login dialog
               openRegisterDialog(); // Open the register dialog

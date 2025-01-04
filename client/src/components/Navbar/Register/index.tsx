@@ -3,14 +3,15 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { DialogTitle, DialogDescription } from "@/components/ui/dialog";
 
-interface RegisterProps{
-    closeDialog: () => void;
+interface RegisterProps {
+  closeDialog: () => void;
 }
 
-const Register: React.FC<RegisterProps> = ({ closeDialog }: { closeDialog: () => void }) => {
+const Register: React.FC<RegisterProps> = ({ closeDialog }) => {
   const [username, setUsername] = useState("");
   const [fullName, setFullName] = useState("");
-  const [avatar, setAvatar] = useState("");
+  const [avatar, setAvatar] = useState<File | null>(null);
+  const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
   const [password, setPassword] = useState("");
   const [interests, setInterests] = useState<string[]>([]);
   const [newInterest, setNewInterest] = useState("");
@@ -30,6 +31,18 @@ const Register: React.FC<RegisterProps> = ({ closeDialog }: { closeDialog: () =>
     setInterests(interests.filter((i) => i !== interest));
   };
 
+  const handleAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setAvatar(file);
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setAvatarPreview(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
   const handleRegister = () => {
     console.log("Username:", username);
     console.log("Full Name:", fullName);
@@ -40,7 +53,7 @@ const Register: React.FC<RegisterProps> = ({ closeDialog }: { closeDialog: () =>
   };
 
   return (
-    <div className="p-6 flex justify-center items-center">
+    <div className="flex justify-center items-center">
       <div>
         <DialogTitle className="text-2xl font-bold text-indigo-800">Register</DialogTitle>
         <DialogDescription className="text-gray-700 mb-4">
@@ -85,16 +98,24 @@ const Register: React.FC<RegisterProps> = ({ closeDialog }: { closeDialog: () =>
 
           <div className="mb-4">
             <label className="block text-gray-700 mb-2" htmlFor="avatar">
-              Avatar URL
+              Avatar
             </label>
             <Input
               id="avatar"
-              type="text"
-              value={avatar}
-              onChange={(e) => setAvatar(e.target.value)}
-              placeholder="Enter your avatar URL"
+              type="file"
+              accept="image/*"
+              onChange={handleAvatarChange}
               className="w-full"
             />
+            {avatarPreview && (
+              <div className="mt-2">
+                <img
+                  src={avatarPreview}
+                  alt="Avatar Preview"
+                  className="w-24 h-24 rounded-full object-cover"
+                />
+              </div>
+            )}
           </div>
 
           <div className="mb-4">
