@@ -2,9 +2,10 @@ import { asyncHandler } from "../utils/asyncHandler.js";
 import { User } from "../models/user.model.js";
 import { Request } from '../models/request.model.js'
 import { ApiResponse } from "../utils/ApiResponse.js";
-import { uploadToS3 } from "../utils/uploadOnS3.js";
+// import { uploadToS3 } from "../utils/uploadOnS3.js";
 import { generateTokens } from "../utils/GenerateToken.js";
 import { uploadOnCloudinary } from "../utils/cloudinary.js";
+import mongoose from "mongoose";
 
 const registerUser = asyncHandler(async (req, res) => {
   const { fullname, username, password } = req.body;
@@ -276,6 +277,49 @@ const sendFriendRequest = asyncHandler(async (req, res) => {
     .json(new ApiResponse(201, {}, "Friend request sent successfully"));
 });
 
+const getFriends = asyncHandler(async (req, res) => {
+  const user = await User.aggregate([
+    {
+      $match: { _id: new mongoose.Types.ObjectId(req.user._id) },
+    },
+    {
+      $lookup: {
+        from: "users",
+        localField: "friends",
+        foreignField: "_id",
+        as: "friendsDetails",
+      },
+    },
+    {
+      $unwind: "$friendsDetails",
+    },
+    {
+      $project: {
+        "friendsDetails._id": 1,
+        "friendsDetails.fullname": 1,
+        "friendsDetails.avatar": 1,
+        "friendsDetails.username": 1,
+      },
+    },
+    {
+      $group: {
+        _id: "$_id",
+        friends: { $push: "$friendsDetails" },
+      },
+    },
+  ]);
+
+  if (!user || user.length === 0) {
+    return res
+      .status(404)
+      .json(new ApiResponse(404, {}, "User not found"));
+  }
+
+  return res
+    .status(200)
+    .json(new ApiResponse(200, user[0].friends, "Friends retrieved successfully"));
+});
+
 
 export {
     registerUser,
@@ -283,5 +327,6 @@ export {
     logoutUser,
     handleFriendRequest,
     getAllRequests,
-    sendFriendRequest
+    sendFriendRequest,
+    getFriends
 }

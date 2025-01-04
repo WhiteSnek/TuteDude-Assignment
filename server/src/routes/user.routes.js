@@ -5,7 +5,8 @@ import {
     logoutUser,
     handleFriendRequest,
     getAllRequests,
-    sendFriendRequest
+    sendFriendRequest,
+    getFriends
 } from "../controllers/user.controller.js";
 import { upload } from "../middlewares/multer.middleware.js";
 import { verifyJWT } from "../middlewares/auth.middleware.js";
@@ -17,5 +18,6 @@ router.route("/login").post(loginUser);
 router.route("/logout").post(verifyJWT, logoutUser);
 router.route("/friend-request").post(verifyJWT, handleFriendRequest);
 router.route("/request").get(verifyJWT, getAllRequests).post(verifyJWT, sendFriendRequest);
+router.route("/friends").get(verifyJWT, getFriends);
 
 export default router;
