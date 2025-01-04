@@ -320,6 +320,133 @@ const getFriends = asyncHandler(async (req, res) => {
     .json(new ApiResponse(200, user[0].friends, "Friends retrieved successfully"));
 });
 
+const getRecommendedPeople = asyncHandler(async (req, res) => {
+  const user = await User.findById(req.user._id).populate("friends");
+
+  if (!user) {
+    return res
+      .status(404)
+      .json(new ApiResponse(404, {}, "User not found"));
+  }
+
+  const recommendedPeople = await User.aggregate([
+    {
+      $match: { _id: { $ne: new mongoose.Types.ObjectId(req.user._id) } },
+    },
+    {
+      $lookup: {
+        from: "users",
+        localField: "friends",
+        foreignField: "_id",
+        as: "friendsDetails",
+      },
+    },
+    {
+      $project: {
+        _id: 1,
+        fullname: 1,
+        username: 1,
+        avatar: 1,
+        interests: 1,
+        friends: 1, 
+        friendsDetails: 1,
+      },
+    },
+    {
+      $addFields: {
+        mutualFriends: {
+          $size: {
+            $setIntersection: [
+              "$friends", // The friends of the current user in the pipeline (array of ObjectIds)
+              user.friends.map(friend => friend._id), // The friends of the logged-in user (array of ObjectIds)
+            ],
+          },
+        },
+        commonInterests: {
+          $size: {
+            $setIntersection: ["$interests", user.interests],
+          },
+        },
+      },
+    },
+    {
+      $match: {
+        $or: [
+          { mutualFriends: { $gte: 1 } },
+          { commonInterests: { $gte: 1 } },
+        ],
+      },
+    },
+    {
+      $project: {
+        _id: 1,
+        fullname: 1,
+        username: 1,
+        avatar: 1,
+        mutualFriends: 1,
+        commonInterests: 1,
+        friendsDetails: 1,
+      },
+    },
+    {
+      $addFields: {
+        reason: {
+          $cond: {
+            if: { $gt: ["$mutualFriends", 0] },
+            then: {
+              $concat: [
+                "You both have mutual friends: ",
+                {
+                  $reduce: {
+                    input: "$friendsDetails",
+                    initialValue: "",
+                    in: {
+                      $cond: {
+                        if: {
+                          $in: ["$$this._id", user.friends.map(friend => friend._id)],
+                        },
+                        then: {
+                          $concat: ["$$value", "$$this.fullname"],
+                        },
+                        else: "$$value",
+                      },
+                    },
+                  },
+                },
+              ],
+            },
+            else: {
+              $concat: [
+                "You both share common interests in: ",
+                { $arrayElemAt: ["$interests", 0] },
+              ],
+            },
+          },
+        },
+      },
+    },
+    {
+      $project: {
+        _id: 1,
+        fullname: 1,
+        username: 1,
+        avatar: 1,
+        mutualFriends: 1,
+        commonInterests: 1,
+        reason: 1
+      },
+    },
+  ]);
+
+  return res
+    .status(200)
+    .json(new ApiResponse(200, { recommendedPeople }, "Recommendations retrieved successfully"));
+});
+
+
+
+
+
 
 export {
     registerUser,
@@ -328,5 +455,6 @@ export {
     handleFriendRequest,
     getAllRequests,
     sendFriendRequest,
-    getFriends
+    getFriends,
+    getRecommendedPeople,
 }
