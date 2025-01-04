@@ -88,7 +88,7 @@ const RecommendedPeople: React.FC<RecommendedPeopleProps> = ({
           <DialogContent className="bg-white rounded-lg p-6 shadow-lg max-w-md mx-auto">
             <DialogTitle className="text-xl font-semibold text-gray-800">Why {selectedRecommendation.name} was recommended?</DialogTitle>
             <DialogDescription className="text-gray-600 mt-3">
-              <strong>Interests:</strong> {selectedRecommendation.interests.join(", ")}
+              <strong>Because you have common interests:</strong> <br/> {selectedRecommendation.interests.join(", ")}
             </DialogDescription>
             <DialogFooter>
               <Button variant="outline" onClick={() => setOpenDialog(false)} className="mt-4 w-full">

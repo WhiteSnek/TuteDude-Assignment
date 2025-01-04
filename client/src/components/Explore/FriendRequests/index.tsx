@@ -20,9 +20,9 @@ const FriendRequests: React.FC<FriendRequestsProps> = ({ friendRequests, acceptF
       {friendRequests.length === 0 ? (
         <p>No pending friend requests.</p>
       ) : (
-        <div className="flex flex-wrap gap-4">
+        <div className="flex flex-wrap gap-4 ">
           {friendRequests.map((user) => (
-            <div key={user.id} className="flex items-center gap-4 p-4 border rounded-lg w-full sm:w-1/3">
+            <div key={user.id} className="flex items-center gap-4 p-4 border rounded-lg w-full hover:shadow-lg">
               <img src={user.avatar} alt={user.name} className="w-12 h-12 rounded-full" />
               <div className="flex flex-col">
                 <span className="font-medium">{user.name}</span>

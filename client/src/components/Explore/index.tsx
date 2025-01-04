@@ -69,17 +69,14 @@ const Explore: React.FC = () => {
 
   return (
     <div className="grid grid-cols-1 sm:grid-cols-12 p-6 gap-8 h-screen">
-      {/* Friends List (Left) */}
       <div className="col-span-1 sm:col-span-3 h-full">
         <FriendsList friends={friends} />
       </div>
 
-      {/* Explore People (Center) */}
       <div className="col-span-1 sm:col-span-6">
         <RecommendedPeople recommendedPeople={recommendedPeople} sendFriendRequest={sendFriendRequest} />
       </div>
 
-      {/* Friend Requests (Right) */}
       <div className="col-span-1 sm:col-span-3">
         <FriendRequests
           friendRequests={friendRequests}
