@@ -8,12 +8,23 @@ import { uploadOnCloudinary } from "../utils/cloudinary.js";
 import mongoose from "mongoose";
 
 const registerUser = asyncHandler(async (req, res) => {
-  const { fullname, username, password } = req.body;
+  const { fullname, username, password, interests } = req.body;
+
+  // Check if all required fields are provided
   if ([fullname, username, password].some((field) => field?.trim() === "")) {
     return res
       .status(400)
       .json(new ApiResponse(400, {}, "All fields are required"));
   }
+
+  // Validate interests to ensure it's an array of strings
+  if (interests && !Array.isArray(interests)) {
+    return res
+      .status(400)
+      .json(new ApiResponse(400, {}, "Interests must be an array of strings"));
+  }
+
+  // Check if the user already exists
   const existedUser = await User.findOne({
     username,
   });
@@ -21,24 +32,29 @@ const registerUser = asyncHandler(async (req, res) => {
     return res
       .status(409)
       .json(new ApiResponse(409, {}, "User with email or username exists"));
-  const avatarLocalPath = req.file?.path;
 
+  // Handle avatar upload
+  const avatarLocalPath = req.file?.path;
   if (!avatarLocalPath)
     return res.status(400).json(new ApiResponse(400, {}, "Avatar is required"));
+
   const key = `profile/${username}`;
-  // const avatar = await uploadToS3(avatarLocalPath, key);
   const avatar = await uploadOnCloudinary(avatarLocalPath);
   if (!avatar)
     return res
       .status(500)
       .json(new ApiResponse(500, {}, "Avatar upload failed!"));
+
+  // Create the user with interests and other data
   const user = await User.create({
     fullname,
     avatar: avatar.url,
     password,
     username: username.toLowerCase(),
+    interests: interests || [],  // Default to an empty array if no interests are provided
   });
 
+  // Fetch the created user without sensitive fields
   const createdUser = await User.findById(user._id).select(
     "-password -refreshToken"
   );
@@ -53,6 +69,7 @@ const registerUser = asyncHandler(async (req, res) => {
     .status(201)
     .json(new ApiResponse(200, createdUser, "User registered successfully"));
 });
+
 
 // Login users
 const loginUser = asyncHandler(async (req, res) => {
@@ -323,7 +340,7 @@ const getFriends = asyncHandler(async (req, res) => {
   ]);
 
   if (!user || user.length === 0) {
-    return res.status(404).json(new ApiResponse(404, {}, "User not found"));
+    return res.status(200).json(new ApiResponse(200, [], "User has no friends"));
   }
 
   return res
@@ -345,7 +362,7 @@ const getRecommendedPeople = asyncHandler(async (req, res) => {
       $match: {
         _id: {
           $nin: user.friends.map((friend) => friend._id),
-          $ne: new mongoose.Types.ObjectId(req.user._id), 
+          $ne: new mongoose.Types.ObjectId(req.user._id),
         },
       },
     },
@@ -422,7 +439,11 @@ const getRecommendedPeople = asyncHandler(async (req, res) => {
                           ],
                         },
                         then: {
-                          $concat: ["$$value", "$$this.fullname"],
+                          $concat: [
+                            "$$value",
+                            "$$this.fullname",
+                            ", ", // Add a separator between names
+                          ],
                         },
                         else: "$$value",
                       },
@@ -432,10 +453,30 @@ const getRecommendedPeople = asyncHandler(async (req, res) => {
               ],
             },
             else: {
-              $concat: [
-                "You both share common interests in: ",
-                { $arrayElemAt: ["$interests", 0] },
-              ],
+              $cond: {
+                if: { $gt: ["$commonInterests", 0] },
+                then: {
+                  $concat: [
+                    "You both share common interests in: ",
+                    {
+                      $reduce: {
+                        input: "$interests",
+                        initialValue: "",
+                        in: {
+                          $cond: {
+                            if: { $ne: ["$$this", ""] },
+                            then: {
+                              $concat: ["$$value", "$$this", ", "],
+                            },
+                            else: "$$value",
+                          },
+                        },
+                      },
+                    },
+                  ],
+                },
+                else: "No mutual friends or common interests.",
+              },
             },
           },
         },
@@ -464,6 +505,8 @@ const getRecommendedPeople = asyncHandler(async (req, res) => {
       )
     );
 });
+
+
 
 const addInterests = asyncHandler(async (req, res) => {
   const { interests } = req.body;

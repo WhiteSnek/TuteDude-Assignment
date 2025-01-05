@@ -42,4 +42,8 @@ export interface UserContextType {
     success: boolean;
     message: string;
   }>;
+  register: (formData: FormData) => Promise<{
+    success: boolean;
+    message: string;
+  }>;
 }

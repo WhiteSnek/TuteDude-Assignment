@@ -66,25 +66,28 @@ const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
     }
   };
 
-  //   const register = async (formData: FormData): Promise<boolean> => {
-  //     try {
-  //       const email = formData.get("email");
-  //       const password = formData.get("password");
-  //       if (typeof email !== "string" || typeof password !== "string") {
-  //         throw new Error("Invalid email or password");
-  //       }
-  //       const userInfo: LoginTemplate = { email, password };
-  //       await axios.post(
-  //         "/users/addUser",
-  //         formData,
-  //         { withCredentials: true }
-  //       );
-  //       await login(userInfo);
-  //       return true;
-  //     } catch (error) {
-  //       return false;
-  //     }
-  //   };
+    const register = async (formData: FormData): Promise<{success: boolean, message: string}> => {
+      try {
+        const username = formData.get("username");
+        const password = formData.get("password");
+        if (typeof username !== "string" || typeof password !== "string") {
+          throw new Error("Invalid email or password");
+        }
+        const userInfo: LoginUser = { username, password };
+        const response:AxiosResponse<NoData> = await axios.post(
+          "/users/register",
+          formData,
+          { withCredentials: true }
+        );
+        if(response.data.success){
+          await login(userInfo);
+          return { success: true, message: response.data.message };
+        }
+        return {success: false, message: response.data.message}
+      } catch (error: any) {
+        return {success: false, message: error}
+      }
+    };
 
     const logout = async (): Promise<{success: boolean, message: string}> => {
       try {
@@ -281,7 +284,8 @@ const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
         handleFriendRequest,
         sendFriendRequest,
         searchPeople,
-        logout
+        logout,
+        register
       }}
     >
       {children}

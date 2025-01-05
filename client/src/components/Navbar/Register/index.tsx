@@ -2,6 +2,9 @@ import React, { useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import { useUser } from "@/hooks/user.hooks";
+import { useToast } from "@/hooks/use-toast";
+import { useNavigate } from "react-router-dom";
 
 interface RegisterProps {
   closeDialog: () => void;
@@ -15,6 +18,8 @@ const Register: React.FC<RegisterProps> = ({ closeDialog }) => {
   const [password, setPassword] = useState("");
   const [interests, setInterests] = useState<string[]>([]);
   const [newInterest, setNewInterest] = useState("");
+
+  const navigate = useNavigate()
 
   const handleInterestChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setNewInterest(e.target.value);
@@ -42,14 +47,33 @@ const Register: React.FC<RegisterProps> = ({ closeDialog }) => {
       reader.readAsDataURL(file);
     }
   };
-
-  const handleRegister = () => {
-    console.log("Username:", username);
-    console.log("Full Name:", fullName);
-    console.log("Avatar:", avatar);
-    console.log("Password:", password);
-    console.log("Interests:", interests);
-    // Here, you can send the data to your API or handle registration logic
+  const {register} = useUser()
+  const {toast} = useToast()
+  const handleRegister = async () => {
+    const formData = new FormData();
+    formData.append("username", username);
+    formData.append("fullname", fullName);
+    if (avatar) {
+      formData.append("avatar", avatar);
+      }
+      formData.append("password", password);
+      interests.forEach((interest) => {
+        formData.append("interests[]", interest); 
+      });
+    const response = await register(formData);
+    if(response.success){
+      toast({
+        title: "Registration successful",
+      })
+    } else{
+      toast({
+        variant: "destructive",
+        title: "Registration failed",
+        description: response.message,
+        })
+    }
+    navigate('/explore')
+    closeDialog()
   };
 
   return (

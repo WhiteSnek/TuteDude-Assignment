@@ -12,15 +12,17 @@ const FriendsList: React.FC = () => {
   useEffect(() => {
     const getFriendsArray = async () => {
       const response = await getFriends();
-      if (response.success) setFriends(response.message);
-      else {
+      if (response.success) {
+        setFriends(response.message);
+      } else {
+        const errorMessage = typeof response.error === "object" ? JSON.stringify(response.error) : response.error;
         toast({
           variant: "destructive",
-          title: response.error,
+          title: errorMessage,
         });
       }
     };
-    getFriendsArray()
+    getFriendsArray();
   }, []);
   return (
     <div className="bg-zinc-100 rounded-md p-6 h-full shadow-md">
