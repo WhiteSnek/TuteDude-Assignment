@@ -3,6 +3,10 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { useNavigate } from "react-router-dom";
+import { useUser } from "@/hooks/user.hooks";
+import { LoginUser } from "@/types/login.types";
+import { useToast } from "@/hooks/use-toast";
+import { Toaster } from "@/components/ui/toaster";
 
 interface LoginProps {
   closeDialog: () => void;
@@ -13,12 +17,24 @@ const Login: React.FC<LoginProps> = ({ closeDialog, openRegisterDialog }) => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const navigate = useNavigate();
-
-  const handleLogin = () => {
-    console.log("Username:", username);
-    console.log("Password:", password);
-    navigate("/explore");
-    closeDialog();
+  const { login } = useUser();
+  const {toast} = useToast()
+  const handleLogin = async () => {
+    const data: LoginUser = {
+      username,
+      password
+    } 
+    const response = await login(data)
+    if(response.success){
+      navigate("/explore");
+      closeDialog();
+    }
+    else {
+      toast({
+        variant: "destructive",
+        title: response.error,
+      })
+    }
   };
 
   return (
@@ -101,6 +117,7 @@ const Login: React.FC<LoginProps> = ({ closeDialog, openRegisterDialog }) => {
           </Button>
         </div>
       </div>
+      <Toaster />
     </div>
   );
 };
