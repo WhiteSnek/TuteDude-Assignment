@@ -13,6 +13,9 @@ import UserProvider from "./context/UserProvider.tsx";
 import axios from "axios";
 
 axios.defaults.baseURL = import.meta.env.VITE_BACKEND_URI
+axios.defaults.validateStatus = (status) => {
+  return status >= 200 && status < 600;
+};
 const Layout: React.FC = () => {
   const router = createBrowserRouter(
     createRoutesFromElements(

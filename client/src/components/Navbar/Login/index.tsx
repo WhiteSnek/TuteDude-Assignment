@@ -25,6 +25,7 @@ const Login: React.FC<LoginProps> = ({ closeDialog, openRegisterDialog }) => {
       password
     } 
     const response = await login(data)
+    console.log(response)
     if(response.success){
       navigate("/explore");
       closeDialog();
