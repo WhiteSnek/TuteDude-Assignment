@@ -7,12 +7,14 @@ import Profile from "./Profile";
 import Login from "./Login";
 import Register from "./Register";
 import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
+import { useUser } from "@/hooks/user.hooks";
 
 const Navbar: React.FC = () => {
   const [isLoginOpen, setIsLoginOpen] = useState(false);
   const [isRegisterOpen, setIsRegisterOpen] = useState(false);
 
-  const user = null;
+  const {user} = useUser()
+  // const user = null
 
   const closeLoginDialog = () => setIsLoginOpen(false);
   const openRegisterDialog = () => setIsRegisterOpen(true);

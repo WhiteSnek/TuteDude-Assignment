@@ -3,7 +3,7 @@ import React from "react";
 
 const Search: React.FC = () => {
   return (
-    <div className="hidden md:block w-1/2">
+    <div className="hidden md:block ">
       <Input
         type="text"
         placeholder="Search People..."

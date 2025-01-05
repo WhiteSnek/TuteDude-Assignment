@@ -1,6 +1,6 @@
 import { asyncHandler } from "../utils/asyncHandler.js";
 import { User } from "../models/user.model.js";
-import { Request } from '../models/request.model.js'
+import { Request } from "../models/request.model.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 // import { uploadToS3 } from "../utils/uploadOnS3.js";
 import { generateTokens } from "../utils/GenerateToken.js";
@@ -15,7 +15,7 @@ const registerUser = asyncHandler(async (req, res) => {
       .json(new ApiResponse(400, {}, "All fields are required"));
   }
   const existedUser = await User.findOne({
-    username
+    username,
   });
   if (existedUser)
     return res
@@ -24,12 +24,10 @@ const registerUser = asyncHandler(async (req, res) => {
   const avatarLocalPath = req.file?.path;
 
   if (!avatarLocalPath)
-    return res
-      .status(400)
-      .json(new ApiResponse(400, {}, "Avatar is required"));
+    return res.status(400).json(new ApiResponse(400, {}, "Avatar is required"));
   const key = `profile/${username}`;
   // const avatar = await uploadToS3(avatarLocalPath, key);
-  const avatar = await uploadOnCloudinary(avatarLocalPath)
+  const avatar = await uploadOnCloudinary(avatarLocalPath);
   if (!avatar)
     return res
       .status(500)
@@ -61,7 +59,9 @@ const loginUser = asyncHandler(async (req, res) => {
   const { username, password } = req.body;
 
   if (!username) {
-    return res.status(400).json(new ApiResponse(400, {}, "Username is required"));
+    return res
+      .status(400)
+      .json(new ApiResponse(400, {}, "Username is required"));
   }
 
   const user = await User.findOne({
@@ -90,7 +90,7 @@ const loginUser = asyncHandler(async (req, res) => {
       );
   }
 
-  const loggendInUser = await User.findById(user._id).select("-password");
+  const loggendInUser = await User.findById(user._id).select("-password -refreshToken -friends -interests -createdAt -updatedAt");
 
   const options = {
     httpOnly: true,
@@ -101,17 +101,7 @@ const loginUser = asyncHandler(async (req, res) => {
     .status(200)
     .cookie("accessToken", accessToken, options)
     .cookie("refreshToken", refreshToken, options)
-    .json(
-      new ApiResponse(
-        200,
-        {
-          user: loggendInUser,
-          access_token: accessToken,
-          refresh_token: refreshToken,
-        },
-        "User logged in successfully"
-      )
-    );
+    .json(new ApiResponse(200, loggendInUser, "User logged in successfully"));
 });
 
 // Logout users
@@ -137,6 +127,11 @@ const logoutUser = asyncHandler(async (req, res) => {
     .clearCookie("refreshToken", options)
     .json(new ApiResponse(200, {}, "User logged out"));
 });
+
+const getCurrentUser = asyncHandler(async (req,res) => {
+  const user = await User.findById(req.user._id).select("-password -refreshToken -friends -interests -createdAt -updatedAt");
+  return res.status(200).json(new ApiResponse(200, user, "User retrieved successfully"));
+})
 
 const handleFriendRequest = asyncHandler(async (req, res) => {
   const { requestId, status } = req.body;
@@ -164,7 +159,13 @@ const handleFriendRequest = asyncHandler(async (req, res) => {
   if (friendRequest.toUserId.toString() !== req.user._id.toString()) {
     return res
       .status(403)
-      .json(new ApiResponse(403, {}, "You are not authorized to handle this request"));
+      .json(
+        new ApiResponse(
+          403,
+          {},
+          "You are not authorized to handle this request"
+        )
+      );
   }
 
   // Update the request status
@@ -183,7 +184,9 @@ const handleFriendRequest = asyncHandler(async (req, res) => {
 
     return res
       .status(200)
-      .json(new ApiResponse(200, {}, "Friend request accepted and friend added"));
+      .json(
+        new ApiResponse(200, {}, "Friend request accepted and friend added")
+      );
   }
 
   return res
@@ -224,7 +227,9 @@ const getAllRequests = asyncHandler(async (req, res) => {
 
   return res
     .status(200)
-    .json(new ApiResponse(200, { requests }, "Friend requests fetched successfully"));
+    .json(
+      new ApiResponse(200, { requests }, "Friend requests fetched successfully")
+    );
 });
 
 const sendFriendRequest = asyncHandler(async (req, res) => {
@@ -239,7 +244,9 @@ const sendFriendRequest = asyncHandler(async (req, res) => {
   if (toUserId === req.user._id.toString()) {
     return res
       .status(400)
-      .json(new ApiResponse(400, {}, "You cannot send a friend request to yourself"));
+      .json(
+        new ApiResponse(400, {}, "You cannot send a friend request to yourself")
+      );
   }
 
   // Check if the recipient user exists
@@ -310,23 +317,21 @@ const getFriends = asyncHandler(async (req, res) => {
   ]);
 
   if (!user || user.length === 0) {
-    return res
-      .status(404)
-      .json(new ApiResponse(404, {}, "User not found"));
+    return res.status(404).json(new ApiResponse(404, {}, "User not found"));
   }
 
   return res
     .status(200)
-    .json(new ApiResponse(200, user[0].friends, "Friends retrieved successfully"));
+    .json(
+      new ApiResponse(200, user[0].friends, "Friends retrieved successfully")
+    );
 });
 
 const getRecommendedPeople = asyncHandler(async (req, res) => {
   const user = await User.findById(req.user._id).populate("friends");
 
   if (!user) {
-    return res
-      .status(404)
-      .json(new ApiResponse(404, {}, "User not found"));
+    return res.status(404).json(new ApiResponse(404, {}, "User not found"));
   }
 
   const recommendedPeople = await User.aggregate([
@@ -348,7 +353,7 @@ const getRecommendedPeople = asyncHandler(async (req, res) => {
         username: 1,
         avatar: 1,
         interests: 1,
-        friends: 1, 
+        friends: 1,
         friendsDetails: 1,
       },
     },
@@ -358,7 +363,7 @@ const getRecommendedPeople = asyncHandler(async (req, res) => {
           $size: {
             $setIntersection: [
               "$friends", // The friends of the current user in the pipeline (array of ObjectIds)
-              user.friends.map(friend => friend._id), // The friends of the logged-in user (array of ObjectIds)
+              user.friends.map((friend) => friend._id), // The friends of the logged-in user (array of ObjectIds)
             ],
           },
         },
@@ -371,10 +376,7 @@ const getRecommendedPeople = asyncHandler(async (req, res) => {
     },
     {
       $match: {
-        $or: [
-          { mutualFriends: { $gte: 1 } },
-          { commonInterests: { $gte: 1 } },
-        ],
+        $or: [{ mutualFriends: { $gte: 1 } }, { commonInterests: { $gte: 1 } }],
       },
     },
     {
@@ -403,7 +405,10 @@ const getRecommendedPeople = asyncHandler(async (req, res) => {
                     in: {
                       $cond: {
                         if: {
-                          $in: ["$$this._id", user.friends.map(friend => friend._id)],
+                          $in: [
+                            "$$this._id",
+                            user.friends.map((friend) => friend._id),
+                          ],
                         },
                         then: {
                           $concat: ["$$value", "$$this.fullname"],
@@ -433,16 +438,21 @@ const getRecommendedPeople = asyncHandler(async (req, res) => {
         avatar: 1,
         mutualFriends: 1,
         commonInterests: 1,
-        reason: 1
+        reason: 1,
       },
     },
   ]);
 
   return res
     .status(200)
-    .json(new ApiResponse(200, { recommendedPeople }, "Recommendations retrieved successfully"));
+    .json(
+      new ApiResponse(
+        200,
+        { recommendedPeople },
+        "Recommendations retrieved successfully"
+      )
+    );
 });
-
 
 const addInterests = asyncHandler(async (req, res) => {
   const { interests } = req.body;
@@ -460,26 +470,30 @@ const addInterests = asyncHandler(async (req, res) => {
   }
 
   const user = await User.findByIdAndUpdate(
-    req.user._id, 
+    req.user._id,
     {
-      $addToSet: { interests: { $each: interests } }, 
+      $addToSet: { interests: { $each: interests } },
     },
-    { new: true } 
+    { new: true }
   );
 
   if (!user) {
-    return res
-      .status(404)
-      .json(new ApiResponse(404, {}, "User not found"));
+    return res.status(404).json(new ApiResponse(404, {}, "User not found"));
   }
 
   return res
     .status(200)
-    .json(new ApiResponse(200, { interests: user.interests }, "Interests added successfully"));
+    .json(
+      new ApiResponse(
+        200,
+        { interests: user.interests },
+        "Interests added successfully"
+      )
+    );
 });
 
 const getUserProfile = asyncHandler(async (req, res) => {
-  const { userId } = req.params; 
+  const { userId } = req.params;
 
   if (!userId) {
     return res
@@ -489,28 +503,29 @@ const getUserProfile = asyncHandler(async (req, res) => {
 
   const user = await User.findById(userId)
     .select("fullname username avatar interests friends")
-    .populate("friends", "fullname username avatar"); 
+    .populate("friends", "fullname username avatar");
 
   if (!user) {
-    return res
-      .status(404)
-      .json(new ApiResponse(404, {}, "User not found"));
+    return res.status(404).json(new ApiResponse(404, {}, "User not found"));
   }
 
   return res
     .status(200)
-    .json(new ApiResponse(200, { user }, "User profile retrieved successfully"));
+    .json(
+      new ApiResponse(200, { user }, "User profile retrieved successfully")
+    );
 });
 
 export {
-    registerUser,
-    loginUser,
-    logoutUser,
-    handleFriendRequest,
-    getAllRequests,
-    sendFriendRequest,
-    getFriends,
-    getRecommendedPeople,
-    addInterests,
-    getUserProfile
-}
+  registerUser,
+  loginUser,
+  logoutUser,
+  handleFriendRequest,
+  getAllRequests,
+  sendFriendRequest,
+  getFriends,
+  getRecommendedPeople,
+  addInterests,
+  getUserProfile,
+  getCurrentUser,
+};
