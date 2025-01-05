@@ -8,11 +8,7 @@ import {
   DialogDescription,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-interface User {
-  id: string;
-  name: string;
-  avatar: string;
-}
+import { User } from "@/types/user.types";
 
 interface FriendInfoProps {
   user: User;
@@ -42,16 +38,16 @@ const Card: React.FC<FriendInfoProps> = ({ user }) => {
     <div className="flex items-center gap-4">
       <img
         src={user.avatar}
-        alt={user.name}
+        alt={user.fullname}
         className="w-14 h-14 rounded-full border-2 border-indigo-600"
       />
       <div className="flex flex-col">
-        <span className="font-medium text-gray-800">{user.name}</span>
+        <span className="font-medium text-gray-800">{user.fullname}</span>
       </div>
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
         <DialogTrigger asChild>
           <Button
-            onClick={() => handleUnfriendClick(user.id)}
+            onClick={() => handleUnfriendClick(user._id)}
             className="bg-red-600 text-white py-2 px-4 rounded-lg hover:bg-red-700 transition-colors duration-300"
           >
             Unfriend
@@ -60,7 +56,7 @@ const Card: React.FC<FriendInfoProps> = ({ user }) => {
         <DialogContent className="bg-white rounded-lg p-6 shadow-lg">
           <DialogTitle>Confirm Unfriend</DialogTitle>
           <DialogDescription>
-            Are you sure you want to unfriend {user.name}? This action cannot be
+            Are you sure you want to unfriend {user.fullname}? This action cannot be
             undone.
           </DialogDescription>
           <DialogFooter>

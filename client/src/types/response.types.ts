@@ -6,3 +6,10 @@ export interface LoginResponse {
     message: string;
     success: boolean;
 }
+
+export interface FriendsResponse {
+    statusCode: number;
+    data: User[];
+    message: string;
+    success: boolean;
+}
