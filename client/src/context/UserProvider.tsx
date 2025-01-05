@@ -173,6 +173,29 @@ const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
     }
   };
 
+  const sendFriendRequest = async (friendId: string): Promise<{
+    success: boolean;
+    message: string;
+  }> => {
+    try {
+      const response: AxiosResponse<NoData> = await axios.post(
+        "/users/request",
+        { friendId },
+        { withCredentials: true }
+      );
+      if (response.data.success) {
+        return { success: true, message: response.data.message};
+      } else
+        return {
+          success: false,
+          message: response.data.message,
+        };
+    } catch (error: any) {
+      return { success: false, message: error };
+    }
+  };
+
+
   const unFriend = async (
     friendId: string
   ): Promise<{ success: boolean; error?: string }> => {
@@ -227,6 +250,7 @@ const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
         getFriendRequests,
         unFriend,
         handleFriendRequest,
+        sendFriendRequest
       }}
     >
       {children}

@@ -90,7 +90,9 @@ const loginUser = asyncHandler(async (req, res) => {
       );
   }
 
-  const loggendInUser = await User.findById(user._id).select("-password -refreshToken -friends -interests -createdAt -updatedAt");
+  const loggendInUser = await User.findById(user._id).select(
+    "-password -refreshToken -friends -interests -createdAt -updatedAt"
+  );
 
   const options = {
     httpOnly: true,
@@ -128,10 +130,14 @@ const logoutUser = asyncHandler(async (req, res) => {
     .json(new ApiResponse(200, {}, "User logged out"));
 });
 
-const getCurrentUser = asyncHandler(async (req,res) => {
-  const user = await User.findById(req.user._id).select("-password -refreshToken -friends -interests -createdAt -updatedAt");
-  return res.status(200).json(new ApiResponse(200, user, "User retrieved successfully"));
-})
+const getCurrentUser = asyncHandler(async (req, res) => {
+  const user = await User.findById(req.user._id).select(
+    "-password -refreshToken -friends -interests -createdAt -updatedAt"
+  );
+  return res
+    .status(200)
+    .json(new ApiResponse(200, user, "User retrieved successfully"));
+});
 
 const handleFriendRequest = asyncHandler(async (req, res) => {
   const { requestId, status } = req.body;
@@ -198,7 +204,7 @@ const getAllRequests = asyncHandler(async (req, res) => {
   const userId = req.user._id;
 
   const requests = await Request.aggregate([
-    { $match: { toUserId: userId, status: 'pending' } },
+    { $match: { toUserId: userId, status: "pending" } },
 
     {
       $lookup: {
@@ -336,7 +342,12 @@ const getRecommendedPeople = asyncHandler(async (req, res) => {
 
   const recommendedPeople = await User.aggregate([
     {
-      $match: { _id: { $ne: new mongoose.Types.ObjectId(req.user._id) } },
+      $match: {
+        _id: {
+          $nin: user.friends.map((friend) => friend._id),
+          $ne: new mongoose.Types.ObjectId(req.user._id), 
+        },
+      },
     },
     {
       $lookup: {
@@ -552,7 +563,7 @@ const unfriendUser = asyncHandler(async (req, res) => {
 });
 
 const searchPeople = asyncHandler(async (req, res) => {
-  const { query } = req.body; 
+  const { query } = req.body;
 
   if (!query) {
     return res
@@ -565,10 +576,7 @@ const searchPeople = asyncHandler(async (req, res) => {
   const results = await User.aggregate([
     {
       $match: {
-        $or: [
-          { fullname: { $regex: regex } },
-          { username: { $regex: regex } },
-        ],
+        $or: [{ fullname: { $regex: regex } }, { username: { $regex: regex } }],
       },
     },
     {
@@ -583,7 +591,9 @@ const searchPeople = asyncHandler(async (req, res) => {
 
   return res
     .status(200)
-    .json(new ApiResponse(200, { results }, "Search results retrieved successfully"));
+    .json(
+      new ApiResponse(200, { results }, "Search results retrieved successfully")
+    );
 });
 
 export {
@@ -599,5 +609,5 @@ export {
   getUserProfile,
   getCurrentUser,
   unfriendUser,
-  searchPeople
+  searchPeople,
 };

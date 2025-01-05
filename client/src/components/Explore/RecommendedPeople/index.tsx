@@ -11,13 +11,7 @@ import {
 import { Recommended } from "@/types/user.types";
 import { useUser } from "@/hooks/user.hooks";
 
-interface RecommendedPeopleProps {
-  sendFriendRequest: (userId: string) => void;
-}
-
-const RecommendedPeople: React.FC<RecommendedPeopleProps> = ({
-  sendFriendRequest,
-}) => {
+const RecommendedPeople: React.FC = () => {
   const [friendRequestSent, setFriendRequestSent] = useState<string | null>(
     null
   );
@@ -49,9 +43,14 @@ const RecommendedPeople: React.FC<RecommendedPeopleProps> = ({
     fetchRecommendedPeople();
   }, []);
 
-  const handleAddFriend = (userId: string) => {
-    sendFriendRequest(userId);
-    setFriendRequestSent(userId);
+  const { sendFriendRequest } = useUser();
+
+  const handleAddFriend = async (userId: string) => {
+    const response = await sendFriendRequest(userId);
+    if (response.success) setFriendRequestSent(userId);
+    else {
+      console.error("Failed to send friend request");
+    }
   };
 
   const handleDeleteRecommendation = (userId: string) => {
