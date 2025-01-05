@@ -21,7 +21,7 @@ app.use(
 
 app.use(express.json());
 app.use(cookieParser());
-app.use(bodyParser.raw({ limit: "10mb", type: "image/*" }));
+// app.use(bodyParser.raw({ limit: "10mb", type: "image/*" }));
 
 
 const PORT = process.env.PORT || 5000;

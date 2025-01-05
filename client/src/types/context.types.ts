@@ -38,4 +38,8 @@ export interface UserContextType {
     message: User[] | null;
     error?: string;
   }>;
+  logout: () => Promise<{
+    success: boolean;
+    message: string;
+  }>;
 }

@@ -86,21 +86,24 @@ const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
   //     }
   //   };
 
-  //   const logout = async (): Promise<boolean> => {
-  //     try {
-  //       const response: AxiosResponse<string> = await axios.post(
-  //         "/users/protected/logout",
-  //         {},
-  //         { withCredentials: true }
-  //       );
-  //       console.log(response);
-  //       setUser(null);
-  //       navigate('/login')
-  //       return true;
-  //     } catch (error) {
-  //       return false;
-  //     }
-  //   };
+    const logout = async (): Promise<{success: boolean, message: string}> => {
+      try {
+        const response: AxiosResponse<NoData> = await axios.post(
+          "/users/logout",
+          {},
+          { withCredentials: true }
+        );
+        if(response.data.success){
+            setUser(null);
+            return { success: true, message: "Logged out successfully" };
+        }
+        else {
+            return { success: false, message: response.data.message };
+        }
+      } catch (error: any) {
+        return { success: false, message: error}
+      }
+    };
 
   const getFriends = async (): Promise<{
     success: boolean;
@@ -277,7 +280,8 @@ const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
         unFriend,
         handleFriendRequest,
         sendFriendRequest,
-        searchPeople
+        searchPeople,
+        logout
       }}
     >
       {children}
