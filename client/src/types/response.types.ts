@@ -1,3 +1,4 @@
+import { FriendRequest } from "./request.types";
 import { Recommended, User } from "./user.types";
 
 export interface LoginResponse {
@@ -17,6 +18,20 @@ export interface FriendsResponse {
 export interface RecommendedPeople {
     statusCode: number;
     data: Recommended[];
+    message: string;
+    success: boolean;
+}
+
+export interface GetFriendRequest {
+    statusCode: number;
+    data: FriendRequest[];
+    message: string;
+    success: boolean;
+}
+
+export interface Unfriend {
+    statusCode: number;
+    data: null;
     message: string;
     success: boolean;
 }

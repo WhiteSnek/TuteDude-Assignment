@@ -9,6 +9,7 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { User } from "@/types/user.types";
+import { useUser } from "@/hooks/user.hooks";
 
 interface FriendInfoProps {
   user: User;
@@ -22,11 +23,13 @@ const Card: React.FC<FriendInfoProps> = ({ user }) => {
     setSelectedUserId(userId);
     setIsDialogOpen(true);
   };
-
-  const handleConfirmUnfriend = () => {
+  const {unFriend} = useUser()
+  const handleConfirmUnfriend = async () => {
     if (selectedUserId) {
-      // onUnfriend(selectedUserId);
-      setIsDialogOpen(false);
+      const response = await unFriend(selectedUserId)
+      if(response.success)
+        setIsDialogOpen(false);
+      else console.log(response.error)
     }
   };
 

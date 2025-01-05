@@ -4,10 +4,13 @@ import { Recommended, User } from "@/types/user.types";
 import { LoginUser } from "@/types/login.types";
 import {
   FriendsResponse,
+  GetFriendRequest,
   LoginResponse,
   RecommendedPeople,
+  Unfriend,
 } from "@/types/response.types";
 import { UserContextType } from "@/types/context.types";
+import { FriendRequest } from "@/types/request.types";
 
 export const UserContext = createContext<UserContextType | undefined>(
   undefined
@@ -147,6 +150,50 @@ const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
     }
   };
 
+  const getFriendRequests = async (): Promise<{
+    success: boolean;
+    message: FriendRequest[] | null;
+    error?: string;
+  }> => {
+    try {
+      const response: AxiosResponse<GetFriendRequest> = await axios.get(
+        "/users/request",
+        { withCredentials: true }
+      );
+      if (response.data.success) {
+        return { success: true, message: response.data.data, error: "" };
+      } else
+        return {
+          success: false,
+          message: null,
+          error: response.data.message,
+        };
+    } catch (error: any) {
+      return { success: false, message: null, error };
+    }
+  };
+
+  const unFriend = async (
+    friendId: string
+  ): Promise<{ success: boolean; error?: string }> => {
+    try {
+      const response: AxiosResponse<Unfriend> = await axios.post(
+        "/users/unfriend",
+        { friendId },
+        { withCredentials: true }
+      );
+      if (response.data.success) {
+        return { success: true, error: "" };
+      } else
+        return {
+          success: false,
+          error: response.data.message,
+        };
+    } catch (error: any) {
+      return { success: false, error };
+    }
+  };
+
   return (
     <UserContext.Provider
       value={{
@@ -155,6 +202,8 @@ const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
         login,
         getFriends,
         getRecommended,
+        getFriendRequests,
+        unFriend,
       }}
     >
       {children}

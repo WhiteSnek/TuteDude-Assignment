@@ -198,7 +198,7 @@ const getAllRequests = asyncHandler(async (req, res) => {
   const userId = req.user._id;
 
   const requests = await Request.aggregate([
-    { $match: { toUserId: userId } },
+    { $match: { toUserId: userId, status: 'pending' } },
 
     {
       $lookup: {
@@ -228,7 +228,7 @@ const getAllRequests = asyncHandler(async (req, res) => {
   return res
     .status(200)
     .json(
-      new ApiResponse(200, { requests }, "Friend requests fetched successfully")
+      new ApiResponse(200, requests, "Friend requests fetched successfully")
     );
 });
 
@@ -516,6 +516,41 @@ const getUserProfile = asyncHandler(async (req, res) => {
     );
 });
 
+const unfriendUser = asyncHandler(async (req, res) => {
+  const { friendId } = req.body;
+
+  if (!friendId) {
+    return res
+      .status(400)
+      .json(new ApiResponse(400, {}, "Friend ID is required"));
+  }
+
+  const user = await User.findById(req.user._id); // Get the logged-in user
+  const friend = await User.findById(friendId); // Get the friend user
+
+  if (!user || !friend) {
+    return res
+      .status(404)
+      .json(new ApiResponse(404, {}, "User or friend not found"));
+  }
+
+  // Remove friendId from the user's friends list
+  user.friends = user.friends.filter(
+    (id) => id.toString() !== friendId.toString()
+  );
+  await user.save();
+
+  // Remove the user's ID from the friend's friends list
+  friend.friends = friend.friends.filter(
+    (id) => id.toString() !== req.user._id.toString()
+  );
+  await friend.save();
+
+  return res
+    .status(200)
+    .json(new ApiResponse(200, {}, "Unfriended successfully"));
+});
+
 export {
   registerUser,
   loginUser,
@@ -528,4 +563,5 @@ export {
   addInterests,
   getUserProfile,
   getCurrentUser,
+  unfriendUser
 };

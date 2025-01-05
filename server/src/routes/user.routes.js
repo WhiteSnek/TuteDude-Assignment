@@ -10,7 +10,8 @@ import {
     getRecommendedPeople,
     addInterests,
     getUserProfile,
-    getCurrentUser
+    getCurrentUser,
+    unfriendUser
 } from "../controllers/user.controller.js";
 import { upload } from "../middlewares/multer.middleware.js";
 import { verifyJWT } from "../middlewares/auth.middleware.js";
@@ -27,4 +28,5 @@ router.route("/recommended").get(verifyJWT, getRecommendedPeople)
 router.route("/interests").post(verifyJWT, addInterests)
 router.route("/profile/:userId").get(getUserProfile);
 router.route("/current-user").get(verifyJWT, getCurrentUser);
+router.route("/unfriend").post(verifyJWT, unfriendUser);
 export default router;
