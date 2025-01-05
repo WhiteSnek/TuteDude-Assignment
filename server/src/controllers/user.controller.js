@@ -551,6 +551,41 @@ const unfriendUser = asyncHandler(async (req, res) => {
     .json(new ApiResponse(200, {}, "Unfriended successfully"));
 });
 
+const searchPeople = asyncHandler(async (req, res) => {
+  const { query } = req.body; 
+
+  if (!query) {
+    return res
+      .status(400)
+      .json(new ApiResponse(400, {}, "Search query is required"));
+  }
+
+  const regex = new RegExp(query, "i"); // Case-insensitive regex for partial matching
+
+  const results = await User.aggregate([
+    {
+      $match: {
+        $or: [
+          { fullname: { $regex: regex } },
+          { username: { $regex: regex } },
+        ],
+      },
+    },
+    {
+      $project: {
+        _id: 1,
+        fullname: 1,
+        username: 1,
+        avatar: 1,
+      },
+    },
+  ]);
+
+  return res
+    .status(200)
+    .json(new ApiResponse(200, { results }, "Search results retrieved successfully"));
+});
+
 export {
   registerUser,
   loginUser,
@@ -563,5 +598,6 @@ export {
   addInterests,
   getUserProfile,
   getCurrentUser,
-  unfriendUser
+  unfriendUser,
+  searchPeople
 };
