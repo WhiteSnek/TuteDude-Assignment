@@ -6,8 +6,8 @@ import {
   FriendsResponse,
   GetFriendRequest,
   LoginResponse,
+  NoData,
   RecommendedPeople,
-  Unfriend,
 } from "@/types/response.types";
 import { UserContextType } from "@/types/context.types";
 import { FriendRequest } from "@/types/request.types";
@@ -177,7 +177,7 @@ const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
     friendId: string
   ): Promise<{ success: boolean; error?: string }> => {
     try {
-      const response: AxiosResponse<Unfriend> = await axios.post(
+      const response: AxiosResponse<NoData> = await axios.post(
         "/users/unfriend",
         { friendId },
         { withCredentials: true }
@@ -194,6 +194,28 @@ const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
     }
   };
 
+  const handleFriendRequest = async (
+    requestId: string,
+    status: string
+  ): Promise<{ success: boolean; error?: string }> => {
+    try {
+        const response: AxiosResponse<NoData> = await axios.post(
+          "/users/friend-request",
+          { requestId, status },
+          { withCredentials: true }
+        );
+        if (response.data.success) {
+          return { success: true, error: "" };
+        } else
+          return {
+            success: false,
+            error: response.data.message,
+          };
+      } catch (error: any) {
+        return { success: false, error };
+      }
+  }
+
   return (
     <UserContext.Provider
       value={{
@@ -204,6 +226,7 @@ const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
         getRecommended,
         getFriendRequests,
         unFriend,
+        handleFriendRequest,
       }}
     >
       {children}

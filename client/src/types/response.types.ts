@@ -29,7 +29,7 @@ export interface GetFriendRequest {
     success: boolean;
 }
 
-export interface Unfriend {
+export interface NoData {
     statusCode: number;
     data: null;
     message: string;
