@@ -63,7 +63,7 @@ const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
       }
     } catch (error: any) {
       console.log(error);
-      return { success: false, error };
+      return { success: false, error: 'Something went wrong!' };
     }
   };
 

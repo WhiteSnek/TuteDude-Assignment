@@ -84,6 +84,7 @@ const loginUser = asyncHandler(async (req, res) => {
   const user = await User.findOne({
     username,
   });
+  console.log(user)
   if (!user) {
     return res.status(404).json(new ApiResponse(404, {}, "User not found"));
   }
