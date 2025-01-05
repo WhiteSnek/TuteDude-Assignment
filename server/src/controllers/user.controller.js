@@ -448,7 +448,7 @@ const getRecommendedPeople = asyncHandler(async (req, res) => {
     .json(
       new ApiResponse(
         200,
-        { recommendedPeople },
+        recommendedPeople,
         "Recommendations retrieved successfully"
       )
     );

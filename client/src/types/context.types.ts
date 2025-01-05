@@ -1,5 +1,5 @@
 import { LoginUser } from "./login.types";
-import { User } from "./user.types";
+import { Recommended, User } from "./user.types";
 
 export interface UserContextType {
   user: User | null;
@@ -8,6 +8,11 @@ export interface UserContextType {
   getFriends: () => Promise<{
     success: boolean;
     message: User[] | null;
+    error?: string;
+  }>;
+  getRecommended: () => Promise<{
+    success: boolean;
+    message: Recommended[] | null;
     error?: string;
   }>;
 }

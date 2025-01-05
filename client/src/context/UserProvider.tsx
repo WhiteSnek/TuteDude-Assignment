@@ -1,8 +1,12 @@
 import React, { createContext, ReactNode, useEffect, useState } from "react";
 import axios, { AxiosResponse } from "axios";
-import { User } from "@/types/user.types";
+import { Recommended, User } from "@/types/user.types";
 import { LoginUser } from "@/types/login.types";
-import { FriendsResponse, LoginResponse } from "@/types/response.types";
+import {
+  FriendsResponse,
+  LoginResponse,
+  RecommendedPeople,
+} from "@/types/response.types";
 import { UserContextType } from "@/types/context.types";
 
 export const UserContext = createContext<UserContextType | undefined>(
@@ -102,9 +106,33 @@ const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
   }> => {
     try {
       const response: AxiosResponse<FriendsResponse> = await axios.get(
-        "/users/friends", {
-            withCredentials: true
+        "/users/friends",
+        {
+          withCredentials: true,
         }
+      );
+      if (response.data.success) {
+        return { success: true, message: response.data.data, error: "" };
+      } else
+        return {
+          success: false,
+          message: null,
+          error: response.data.message,
+        };
+    } catch (error: any) {
+      return { success: false, message: null, error };
+    }
+  };
+
+  const getRecommended = async (): Promise<{
+    success: boolean;
+    message: Recommended[] | null;
+    error?: string;
+  }> => {
+    try {
+      const response: AxiosResponse<RecommendedPeople> = await axios.get(
+        "/users/recommended",
+        { withCredentials: true }
       );
       if (response.data.success) {
         return { success: true, message: response.data.data, error: "" };
@@ -125,7 +153,8 @@ const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
         user,
         setUser,
         login,
-        getFriends
+        getFriends,
+        getRecommended,
       }}
     >
       {children}

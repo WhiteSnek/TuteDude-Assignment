@@ -12,40 +12,11 @@ interface User {
 }
 
 const Explore: React.FC = () => {
-  const [recommendedPeople, setRecommendedPeople] = useState<User[]>([]);
   const [friendRequests, setFriendRequests] = useState<User[]>([]);
-  const [friends, setFriends] = useState<User[]>([]);
 
   useEffect(() => {
-    // Fetch recommended people, friend requests, and friends list (mock data here)
-    setRecommendedPeople([
-      {
-        id: "1",
-        name: "John Doe",
-        avatar: "https://static.vecteezy.com/system/resources/previews/005/544/718/non_2x/profile-icon-design-free-vector.jpg",
-        mutualFriends: ["Emily White", "Michael Brown"],
-        interests: ["Gaming", "Technology", "Movies"]
-      },
-      {
-        id: "2",
-        name: "Jane Smith",
-        avatar: "https://static.vecteezy.com/system/resources/previews/005/544/718/non_2x/profile-icon-design-free-vector.jpg",
-        mutualFriends: ["Emily White"],
-        interests: ["Sports", "Music", "Travel"]
-      },
-      {
-        id: "3",
-        name: "Michael Brown",
-        avatar: "https://static.vecteezy.com/system/resources/previews/005/544/718/non_2x/profile-icon-design-free-vector.jpg",
-        mutualFriends: ["John Doe"],
-        interests: ["Photography", "Traveling"]
-      }
-    ]);
     setFriendRequests([
       { id: "4", name: "Chris Green", avatar: "https://static.vecteezy.com/system/resources/previews/005/544/718/non_2x/profile-icon-design-free-vector.jpg", mutualFriends: [], interests: [] },
-    ]);
-    setFriends([
-      { id: "5", name: "Emily White", avatar: "https://static.vecteezy.com/system/resources/previews/005/544/718/non_2x/profile-icon-design-free-vector.jpg", mutualFriends: [], interests: [] },
     ]);
   }, []);
 
@@ -58,7 +29,6 @@ const Explore: React.FC = () => {
     const userToAdd = friendRequests.find((user) => user.id === userId);
     if (userToAdd) {
       setFriendRequests(friendRequests.filter((user) => user.id !== userId));
-      setFriends([...friends, userToAdd]);
     }
   };
 
@@ -70,11 +40,11 @@ const Explore: React.FC = () => {
   return (
     <div className="grid grid-cols-1 sm:grid-cols-12 p-6 gap-8 h-screen">
       <div className="col-span-1 sm:col-span-3 h-full">
-        <FriendsList friends={friends} />
+        <FriendsList />
       </div>
 
       <div className="col-span-1 sm:col-span-6">
-        <RecommendedPeople recommendedPeople={recommendedPeople} sendFriendRequest={sendFriendRequest} />
+        <RecommendedPeople sendFriendRequest={sendFriendRequest} />
       </div>
 
       <div className="col-span-1 sm:col-span-3">
