@@ -1,12 +1,13 @@
 import React, { createContext, ReactNode, useEffect, useState } from "react";
 import axios, { AxiosResponse } from "axios";
-import { Recommended, User } from "@/types/user.types";
+import { ProfileType, Recommended, User } from "@/types/user.types";
 import { LoginUser } from "@/types/login.types";
 import {
   FriendsResponse,
   GetFriendRequest,
   LoginResponse,
   NoData,
+  ProfileResponse,
   RecommendedPeople,
 } from "@/types/response.types";
 import { UserContextType } from "@/types/context.types";
@@ -271,6 +272,23 @@ const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
     }
   };
 
+  const getUserProfile = async(userId: string): Promise<{ success: boolean; data: ProfileType | null; error?: string }> => {
+    try {
+      const response:AxiosResponse<ProfileResponse> = await axios.get(`/users/profile/${userId}`);
+      console.log(response.data)
+      if (response.data.success) {
+        return { success: true, data: response.data.data, error: "" };
+      } else
+        return {
+          success: false,
+          data: null,
+          error: response.data.message,
+        };
+    } catch (error: any) {
+      return { success: false, data: null, error };
+    }
+  }
+
   return (
     <UserContext.Provider
       value={{
@@ -285,7 +303,8 @@ const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
         sendFriendRequest,
         searchPeople,
         logout,
-        register
+        register,
+        getUserProfile,
       }}
     >
       {children}

@@ -15,3 +15,12 @@ export interface Recommended {
     commonInterests: number;
     reason: string;
 }
+
+export interface ProfileType {
+    _id: string;
+    username: string;
+    fullname: string;
+    avatar: string;
+    friends: User[];
+    interests: string[]
+}

@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { User } from "@/types/user.types";
 import { UserPlus } from "lucide-react";
 import { useUser } from "@/hooks/user.hooks";
+import { useNavigate } from "react-router-dom";
 
 interface SearchDropdownProps {
   results: User[];
@@ -13,6 +14,7 @@ const SearchDropdown: React.FC<SearchDropdownProps> = ({ results }) => {
   const [friendRequestSent, setFriendRequestSent] = useState<string | null>(
     null
   );
+  const navigate = useNavigate()
   const { sendFriendRequest } = useUser();
   const handleAddFriend = async (userId: string) => {
     const response = await sendFriendRequest(userId);
@@ -22,12 +24,13 @@ const SearchDropdown: React.FC<SearchDropdownProps> = ({ results }) => {
     }
   };
   return (
-    <Card className="absolute top-10 right-20 py-4 w-[200px] md:w-[400px] bg-zinc-300 text-black rounded-lg shadow-lg">
+    <Card className="absolute z-50 top-10 right-20 py-4 w-[200px] md:w-[400px] bg-zinc-300 text-black rounded-lg shadow-lg">
       <CardContent className="space-y-2">
         {results.map((user) => (
-          <div
+          <button
+          onClick={()=>navigate(`/profile/${user._id}`)}
             key={user._id}
-            className="flex items-center justify-between p-3 rounded-lg hover:bg-zinc-200 transition duration-200"
+            className="flex w-full items-center justify-between p-3 rounded-lg hover:bg-zinc-200 transition duration-200"
           >
             {/* User Info */}
             <div className="flex items-center space-x-4">
@@ -60,7 +63,7 @@ const SearchDropdown: React.FC<SearchDropdownProps> = ({ results }) => {
                 Add Friend
               </Button>
             )}
-          </div>
+          </button>
         ))}
       </CardContent>
     </Card>

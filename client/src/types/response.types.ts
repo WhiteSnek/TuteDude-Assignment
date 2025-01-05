@@ -1,5 +1,5 @@
 import { FriendRequest } from "./request.types";
-import { Recommended, User } from "./user.types";
+import { ProfileType, Recommended, User } from "./user.types";
 
 export interface LoginResponse {
     statusCode: number;
@@ -32,6 +32,13 @@ export interface GetFriendRequest {
 export interface NoData {
     statusCode: number;
     data: null;
+    message: string;
+    success: boolean;
+}
+
+export interface ProfileResponse {
+    statusCode: number;
+    data: ProfileType;
     message: string;
     success: boolean;
 }

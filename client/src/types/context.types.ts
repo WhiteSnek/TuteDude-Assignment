@@ -1,6 +1,6 @@
 import { LoginUser } from "./login.types";
 import { FriendRequest } from "./request.types";
-import { Recommended, User } from "./user.types";
+import { ProfileType, Recommended, User } from "./user.types";
 
 export interface UserContextType {
   user: User | null;
@@ -46,4 +46,5 @@ export interface UserContextType {
     success: boolean;
     message: string;
   }>;
+  getUserProfile: (userId: string) => Promise<{ success: boolean; data: ProfileType | null; error?: string }>
 }

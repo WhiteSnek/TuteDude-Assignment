@@ -548,7 +548,6 @@ const addInterests = asyncHandler(async (req, res) => {
 
 const getUserProfile = asyncHandler(async (req, res) => {
   const { userId } = req.params;
-
   if (!userId) {
     return res
       .status(400)
@@ -566,7 +565,7 @@ const getUserProfile = asyncHandler(async (req, res) => {
   return res
     .status(200)
     .json(
-      new ApiResponse(200, { user }, "User profile retrieved successfully")
+      new ApiResponse(200, user, "User profile retrieved successfully")
     );
 });
 
