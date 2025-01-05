@@ -592,7 +592,7 @@ const searchPeople = asyncHandler(async (req, res) => {
   return res
     .status(200)
     .json(
-      new ApiResponse(200, { results }, "Search results retrieved successfully")
+      new ApiResponse(200, results, "Search results retrieved successfully")
     );
 });
 

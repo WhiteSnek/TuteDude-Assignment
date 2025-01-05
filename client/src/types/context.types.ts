@@ -29,8 +29,13 @@ export interface UserContextType {
     success: boolean;
     error?: string;
   }>;
-  sendFriendRequest: (friendId: string) => Promise<{
+  sendFriendRequest: (toUserId: string) => Promise<{
     success: boolean;
     message: string;
+  }>;
+  searchPeople: (query: string) => Promise<{
+    success: boolean;
+    message: User[] | null;
+    error?: string;
   }>;
 }

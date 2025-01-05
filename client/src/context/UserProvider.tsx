@@ -173,18 +173,20 @@ const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
     }
   };
 
-  const sendFriendRequest = async (friendId: string): Promise<{
+  const sendFriendRequest = async (
+    toUserId: string
+  ): Promise<{
     success: boolean;
     message: string;
   }> => {
     try {
       const response: AxiosResponse<NoData> = await axios.post(
         "/users/request",
-        { friendId },
+        { toUserId },
         { withCredentials: true }
       );
       if (response.data.success) {
-        return { success: true, message: response.data.message};
+        return { success: true, message: response.data.message };
       } else
         return {
           success: false,
@@ -194,7 +196,6 @@ const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
       return { success: false, message: error };
     }
   };
-
 
   const unFriend = async (
     friendId: string
@@ -222,22 +223,47 @@ const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
     status: string
   ): Promise<{ success: boolean; error?: string }> => {
     try {
-        const response: AxiosResponse<NoData> = await axios.post(
-          "/users/friend-request",
-          { requestId, status },
-          { withCredentials: true }
-        );
-        if (response.data.success) {
-          return { success: true, error: "" };
-        } else
-          return {
-            success: false,
-            error: response.data.message,
-          };
-      } catch (error: any) {
-        return { success: false, error };
-      }
-  }
+      const response: AxiosResponse<NoData> = await axios.post(
+        "/users/friend-request",
+        { requestId, status },
+        { withCredentials: true }
+      );
+      if (response.data.success) {
+        return { success: true, error: "" };
+      } else
+        return {
+          success: false,
+          error: response.data.message,
+        };
+    } catch (error: any) {
+      return { success: false, error };
+    }
+  };
+
+  const searchPeople = async (
+    query: string
+  ): Promise<{
+    success: boolean;
+    message: User[] | null;
+    error?: string;
+  }> => {
+    try {
+      const response: AxiosResponse<FriendsResponse> = await axios.post(
+        "/users/search",
+        { query }
+      );
+      if (response.data.success) {
+        return { success: true, message: response.data.data, error: "" };
+      } else
+        return {
+          success: false,
+          message: null,
+          error: response.data.message,
+        };
+    } catch (error: any) {
+      return { success: false, message: null, error };
+    }
+  };
 
   return (
     <UserContext.Provider
@@ -250,7 +276,8 @@ const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
         getFriendRequests,
         unFriend,
         handleFriendRequest,
-        sendFriendRequest
+        sendFriendRequest,
+        searchPeople
       }}
     >
       {children}
